@@ -1,6 +1,7 @@
 #include "NotoSansBold15.h"
 #include "NotoSansBold36.h"
 #include "NotoSansMonoSCB20.h"
+#include "birdFacts.h"
 
 // The font names are arrays references, thus must NOT be in quotes ""
 #define AA_FONT_SMALL NotoSansBold15
@@ -10,8 +11,18 @@
 #define Screen1_CS 21 
 #define Screen2_CS 22
 
-#define screenOff 1
-#define screenOn 0
+#define SCREENOFF 1
+#define SCREENON 0
+
+#define BLACK 0x0000
+#define ORANGE 0xE4E0
+#define SKYBLUE 0x55BD
+#define BLUISHGREEN 0x04EE
+#define YELLOW 0xF728
+#define BLUE 0x0396
+#define VERMILLION 0xD2E0
+#define REDDISHPURPLE 0xCBD4
+
 
 #include <SPI.h>
 #include <TFT_eSPI.h>       // Hardware-specific library
@@ -32,30 +43,8 @@ void setup(void) {
 
   spr.setColorDepth(16); // 16 bit colour needed to show antialiased fonts
 
-  tft.fillScreen(TFT_BLACK);
+  tft.fillScreen(REDDISHPURPLE);
 }
-
-const int NUMBER_OF_ELEMENTS = 16;
-const int MAX_SIZE = 102;
-
-char birdFacts [NUMBER_OF_ELEMENTS] [MAX_SIZE] = { 
- { "There are over 11,000 known species of birds in the world." }, 
- { "The Ostrich is the largest bird and cannot fly, but it is an excellent runner." }, 
- { "Hummingbirds are the only birds that can fly backward." }, 
- { "Penguins are birds but are unable to fly. They are exceptional swimmers." }, 
- { "The Arctic Tern has the longest migratory journey, covering about 18,641 miles (30,000 km) annually." }, 
- { "The smallest bird in the world is the Bee Hummingbird, weighing around 1.6 to 2 grams." }, 
- { "Falcons are among the fastest birds, reaching speeds of up to 240 mph (386 km/h) in a dive." }, 
- { "The Lyrebird is known for its incredible ability to mimic natural and artificial sounds." }, 
- { "The Kakapo, a nocturnal parrot from New Zealand, is the heaviest parrot and is critically endangered." }, 
- { "Crows are highly intelligent birds and can solve complex problems." }, 
- { "Birds are descendants of dinosaurs." },
- { "The kiwi bird is native to New Zealand and is the only bird with nostrils at the tip of its beak." },
- { "Albatrosses have the longest wingspan of any living bird, reaching up to 9 ft 10in feet (3 meters)." },
- { "The African Grey Parrot is known for its exceptional ability to mimic human speech." },
- { "Some birds, like the Common Swift, can spend almost their entire lives in the air." },
- { "The Hoatzin chick has claws on its wings, a feature retained from its dinosaur ancestors." }
- };
 
 int currentElement = 0;
 int lastElement = NUMBER_OF_ELEMENTS;
@@ -87,24 +76,24 @@ void writeScreen(int element) {
 
   spr.createSprite(width, spriteHeight);   // Create a sprite 100 pixels wide and 50 high
  
-  spr.setTextColor(TFT_BLACK, TFT_GREEN); // Set the font colour and the background colour
+  spr.setTextColor(YELLOW, REDDISHPURPLE); // Set the font colour and the background colour
 
   spr.setTextDatum(ML_DATUM); // Middle left datum
 
   spr.setTextWrap(false);
 
-  digitalWrite(Screen1_CS, screenOn);
-  digitalWrite(Screen2_CS, screenOff);
+  digitalWrite(Screen1_CS, SCREENON);
+  digitalWrite(Screen2_CS, SCREENOFF);
 
-  spr.fillSprite(TFT_GREEN);
+  spr.fillSprite(REDDISHPURPLE);
   spr.drawString("screen 1", 20, spriteHeight/2); // Make sure text fits in the Sprite!
   spr.pushSprite(0, height/2 - (spriteHeight/2));         // Push to TFT screen coord x, y
 
-  digitalWrite(Screen1_CS, screenOff);
-  digitalWrite(Screen2_CS, screenOn);
+  digitalWrite(Screen1_CS, SCREENOFF);
+  digitalWrite(Screen2_CS, SCREENON);
 
   for(int i = width; i > 0 - sentanceLength; i--) {
-    spr.fillSprite(TFT_GREEN);
+    spr.fillSprite(REDDISHPURPLE);
     spr.drawString(factToDisplay, i, spriteHeight/2); // Make sure text fits in the Sprite!
     spr.pushSprite(0, height/2 - (spriteHeight/2));         // Push to TFT screen coord x, y
   }
