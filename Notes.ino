@@ -3,6 +3,11 @@
 Information notes only:
 ======================
 
+Note: it is best to use drawNumber() and drawFloat() for numeric values
+      this reduces digit position movement when the value changes
+      drawNumber() and drawFloat() functions behave like drawString() and are
+      supported by setTextDatum() and setTextPadding()
+
 //These are the text plotting alignment (reference datum point)
 
 TL_DATUM = Top left (default)

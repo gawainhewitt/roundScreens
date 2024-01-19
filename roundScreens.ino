@@ -1,44 +1,13 @@
-/*
-  This sketch is the same as the Font_Demo_1 example, except the fonts in this
-  example are in a FLASH (program memory) array. This means that processors
-  such as the STM32 series that are not supported by a SPIFFS library can use
-  smooth (anti-aliased) fonts.
-*/
-
-/*
-  There are four different methods of plotting anti-aliased fonts to the screen.
-
-  This sketch uses method 1, using tft.print() and tft.println() calls.
-
-  In some cases the sketch shows what can go wrong too, so read the comments!
-  
-  The font is rendered WITHOUT a background, but a background colour needs to be
-  set so the anti-aliasing of the character is performed correctly. This is because
-  characters are drawn one by one.
-  
-  This method is good for static text that does not change often because changing
-  values may flicker. The text appears at the tft cursor coordinates.
-
-  It is also possible to "print" text directly into a created sprite, for example using
-  spr.println("Hello"); and then push the sprite to the screen. That method is not
-  demonstrated in this sketch.
-  
-*/
-
-//  A processing sketch to create new fonts can be found in the Tools folder of TFT_eSPI
-//  https://github.com/Bodmer/TFT_eSPI/tree/master/Tools/Create_Smooth_Font/Create_font
-
-//  This sketch uses font files created from the Noto family of fonts:
-//  https://www.google.com/get/noto/
-
 #include "NotoSansBold15.h"
 #include "NotoSansBold36.h"
+#include "NotoSansMonoSCB20.h"
 
 // The font names are arrays references, thus must NOT be in quotes ""
 #define AA_FONT_SMALL NotoSansBold15
 #define AA_FONT_LARGE NotoSansBold36
+#define AA_FONT_MONO  NotoSansMonoSCB20 // NotoSansMono-SemiCondensedBold 20pt
 
-#define Screen1_CS 21
+#define Screen1_CS 21 
 #define Screen2_CS 22
 
 #define screenOff 1
@@ -47,8 +16,8 @@
 #include <SPI.h>
 #include <TFT_eSPI.h>       // Hardware-specific library
 
-TFT_eSPI tft = TFT_eSPI();
-
+TFT_eSPI    tft = TFT_eSPI();
+TFT_eSprite spr = TFT_eSprite(&tft); // Sprite class needs to be invoked
 
 void setup(void) {
 
@@ -59,91 +28,88 @@ void setup(void) {
 
   tft.begin();
 
-  tft.setRotation(0);
+  tft.setRotation(1);
+
+  spr.setColorDepth(16); // 16 bit colour needed to show antialiased fonts
+
+  tft.fillScreen(TFT_BLACK);
 }
 
+const int NUMBER_OF_ELEMENTS = 16;
+const int MAX_SIZE = 102;
+
+char birdFacts [NUMBER_OF_ELEMENTS] [MAX_SIZE] = { 
+ { "There are over 11,000 known species of birds in the world." }, 
+ { "The Ostrich is the largest bird and cannot fly, but it is an excellent runner." }, 
+ { "Hummingbirds are the only birds that can fly backward." }, 
+ { "Penguins are birds but are unable to fly. They are exceptional swimmers." }, 
+ { "The Arctic Tern has the longest migratory journey, covering about 18,641 miles (30,000 km) annually." }, 
+ { "The smallest bird in the world is the Bee Hummingbird, weighing around 1.6 to 2 grams." }, 
+ { "Falcons are among the fastest birds, reaching speeds of up to 240 mph (386 km/h) in a dive." }, 
+ { "The Lyrebird is known for its incredible ability to mimic natural and artificial sounds." }, 
+ { "The Kakapo, a nocturnal parrot from New Zealand, is the heaviest parrot and is critically endangered." }, 
+ { "Crows are highly intelligent birds and can solve complex problems." }, 
+ { "Birds are descendants of dinosaurs." },
+ { "The kiwi bird is native to New Zealand and is the only bird with nostrils at the tip of its beak." },
+ { "Albatrosses have the longest wingspan of any living bird, reaching up to 9 ft 10in feet (3 meters)." },
+ { "The African Grey Parrot is known for its exceptional ability to mimic human speech." },
+ { "Some birds, like the Common Swift, can spend almost their entire lives in the air." },
+ { "The Hoatzin chick has claws on its wings, a feature retained from its dinosaur ancestors." }
+ };
+
+int currentElement = 0;
+int lastElement = NUMBER_OF_ELEMENTS;
 
 void loop() {
 
-  tft.fillScreen(TFT_BLACK);
+  writeScreen(currentElement);
 
-  tft.setTextColor(TFT_WHITE, TFT_BLACK); // Set the font colour AND the background colour
-                                          // so the anti-aliasing works
+  lastElement = currentElement;
+  currentElement = (currentElement + 1) % NUMBER_OF_ELEMENTS;
 
-  tft.setCursor(0, 0); // Set cursor at top left of screen
+  Serial.print("element is ");
+  Serial.println(currentElement);
+    
+  delay(1000);
+  
+  
+}
 
+void writeScreen(int element) {
+  int width = tft.width(); // Half the screen width
+  int height = tft.height();
+  int spriteHeight = 100;
+  String factToDisplay = birdFacts[currentElement];
 
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // Small font
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  Serial.println("Loading font");
+  spr.loadFont(AA_FONT_LARGE); // Load another different font into the sprite instance
 
-  tft.loadFont(AA_FONT_SMALL);    // Must load the font first
+  int sentanceLength = spr.textWidth(factToDisplay); // in pixels
 
-  tft.setCursor(120, 120);
+  spr.createSprite(width, spriteHeight);   // Create a sprite 100 pixels wide and 50 high
+ 
+  spr.setTextColor(TFT_BLACK, TFT_GREEN); // Set the font colour and the background colour
 
-  tft.setTextDatum(MC_DATUM); // these two lines are about centreing the text
+  spr.setTextDatum(ML_DATUM); // Middle left datum
+
+  spr.setTextWrap(false);
 
   digitalWrite(Screen1_CS, screenOn);
   digitalWrite(Screen2_CS, screenOff);
 
-  tft.drawString("celebrate that", tft.width() / 2, tft.height() / 2); // drawstring("string", x, y);
+  spr.fillSprite(TFT_GREEN);
+  spr.drawString("screen 1", 20, spriteHeight/2); // Make sure text fits in the Sprite!
+  spr.pushSprite(0, height/2 - (spriteHeight/2));         // Push to TFT screen coord x, y
 
   digitalWrite(Screen1_CS, screenOff);
   digitalWrite(Screen2_CS, screenOn);
 
-  tft.drawString("which you have achieved", tft.width() / 2, tft.height() / 2); // drawstring("string", x, y);
-
-
-  // tft.println(); // New line
-
-  // tft.print("ABC"); // print leaves cursor at end of line
-
-  // tft.setTextColor(TFT_CYAN, TFT_BLACK);
-  // tft.println("1234"); // Added to line after ABC
-
-  // tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-  // // print stream formatting can be used,see:
-  // // https://www.arduino.cc/en/Serial/Print
-  // int ivalue = 1234;
-  // tft.println(ivalue);       // print as an ASCII-encoded decimal
-  // tft.println(ivalue, DEC);  // print as an ASCII-encoded decimal
-  // tft.println(ivalue, HEX);  // print as an ASCII-encoded hexadecimal
-  // tft.println(ivalue, OCT);  // print as an ASCII-encoded octal
-  // tft.println(ivalue, BIN);  // print as an ASCII-encoded binary
-
-  // tft.println(); // New line
-  // tft.setTextColor(TFT_MAGENTA, TFT_BLACK);
-  // float fvalue = 1.23456;
-  // tft.println(fvalue, 0);  // no decimal places
-  // tft.println(fvalue, 1);  // 1 decimal place
-  // tft.println(fvalue, 2);  // 2 decimal places
-  // tft.println(fvalue, 5);  // 5 decimal places
-
-  delay(5000);
-
+  for(int i = width; i > 0 - sentanceLength; i--) {
+    spr.fillSprite(TFT_GREEN);
+    spr.drawString(factToDisplay, i, spriteHeight/2); // Make sure text fits in the Sprite!
+    spr.pushSprite(0, height/2 - (spriteHeight/2));         // Push to TFT screen coord x, y
+  }
   
-  // // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // // Large font text wrapping
-  // // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  spr.unloadFont(); // Remove the font to recover memory used
 
-  // tft.fillScreen(TFT_BLACK);
-  
-  // tft.setTextColor(TFT_YELLOW, TFT_BLACK); // Change the font colour and the background colour
-
-  // tft.setCursor(0, 0); // Set cursor at top left of screen
-
-  // tft.println("Large font!");
-
-  // tft.setTextWrap(true); // Wrap on width
-  // tft.setTextColor(TFT_CYAN, TFT_BLACK);
-  // tft.println("Long lines wrap to the next line");
-
-  // tft.setTextWrap(false, false); // Wrap on width and height switched off
-  // tft.setTextColor(TFT_MAGENTA, TFT_BLACK);
-  // tft.println("Unless text wrap is switched off");
-
-  // tft.unloadFont(); // Remove the font to recover memory used
-
-  // delay(8000);
+  spr.deleteSprite(); // Recover memory
 }
