@@ -1,12 +1,10 @@
-#include "NotoSansBold15.h"
+
+#include <LovyanGFX.hpp>
+#include "lgfx_setup.h"
 #include "NotoSansBold36.h"
-#include "NotoSansMonoSCB20.h"
 #include "birdFacts.h"
 
-// The font names are arrays references, thus must NOT be in quotes ""
-#define AA_FONT_SMALL NotoSansBold15
 #define AA_FONT_LARGE NotoSansBold36
-#define AA_FONT_MONO  NotoSansMonoSCB20 // NotoSansMono-SemiCondensedBold 20pt
 
 #define Screen1_CS 21 
 #define Screen2_CS 22
@@ -23,14 +21,12 @@
 #define VERMILLION 0xD2E0
 #define REDDISHPURPLE 0xCBD4
 
+LGFX tft;
+LGFX_Sprite spr(&tft);
 
-#include <SPI.h>
-#include <TFT_eSPI.h>       // Hardware-specific library
-
-TFT_eSPI    tft = TFT_eSPI();
-TFT_eSprite spr = TFT_eSprite(&tft); // Sprite class needs to be invoked
-
-void setup(void) {
+void setup(void)
+{
+  tft.init();
 
   Serial.begin(250000);
 
@@ -49,8 +45,8 @@ void setup(void) {
 int currentElement = 0;
 int lastElement = NUMBER_OF_ELEMENTS;
 
-void loop() {
-
+void loop(void)
+{
   writeScreen(currentElement);
 
   lastElement = currentElement;
@@ -60,8 +56,6 @@ void loop() {
   Serial.println(currentElement);
     
   delay(1000);
-  
-  
 }
 
 void writeScreen(int element) {
@@ -89,13 +83,17 @@ void writeScreen(int element) {
   spr.drawString("screen 1", 20, spriteHeight/2); // Make sure text fits in the Sprite!
   spr.pushSprite(0, height/2 - (spriteHeight/2));         // Push to TFT screen coord x, y
 
+  spr.deleteSprite(); // Recover memory
+
   digitalWrite(Screen1_CS, SCREENOFF);
   digitalWrite(Screen2_CS, SCREENON);
+
+  spr.createSprite(width, spriteHeight);   // Create a sprite 100 pixels wide and 50 high
 
   for(int i = width; i > 0 - sentanceLength; i--) {
     spr.fillSprite(REDDISHPURPLE);
     spr.drawString(factToDisplay, i, spriteHeight/2); // Make sure text fits in the Sprite!
-    spr.pushSprite(0, height/2 - (spriteHeight/2));         // Push to TFT screen coord x, y
+    spr.pushSprite(0, height/2 - (spriteHeight/2) + 1);  // ok on this library it doesn't seem to be able to cope with the same number twice with two screens so this is a hack
   }
   
   spr.unloadFont(); // Remove the font to recover memory used
