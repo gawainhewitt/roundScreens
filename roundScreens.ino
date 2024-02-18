@@ -56,7 +56,7 @@ void loop(void)
 
     spr.createSprite(width -1, height -1);   // Create a sprite - must be smaller than the screen size? certainly not working on the drawing unless smaller
 
-    spr.drawBitmap(-3, 0, epd_bitmap_allArray[i], 239, 239, BLUISHGREEN);
+    spr.drawBitmap(0, 0, epd_bitmap_allArray[i], 239, 239, BLUISHGREEN);
     // spr.drawRect(0, 0, 65, 65, YELLOW);
 
     digitalWrite(Screen1_CS, SCREENON);
