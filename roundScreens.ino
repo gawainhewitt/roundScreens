@@ -36,7 +36,7 @@ void setup(void)
 
   tft.begin();
 
-  tft.setRotation(1);
+  tft.setRotation(0);
 
   spr.setColorDepth(16); // 16 bit colour needed to show antialiased fonts
 
@@ -56,11 +56,11 @@ void loop(void)
 
     spr.createSprite(width -1, height -1);   // Create a sprite - must be smaller than the screen size? certainly not working on the drawing unless smaller
 
-    spr.drawBitmap(0, 0, epd_bitmap_allArray[i], 239, 239, BLUISHGREEN);
+    spr.drawBitmap(0, 0, epd_bitmap_allArray[i], 239, 239, ORANGE);
     // spr.drawRect(0, 0, 65, 65, YELLOW);
 
-    digitalWrite(Screen1_CS, SCREENON);
-    digitalWrite(Screen2_CS, SCREENOFF);
+    digitalWrite(Screen1_CS, SCREENOFF);
+    digitalWrite(Screen2_CS, SCREENON);
 
     spr.pushSprite(0, 0);         // Push to TFT screen coord x, y
 
